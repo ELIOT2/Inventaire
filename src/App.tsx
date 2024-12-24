@@ -1,39 +1,89 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
-import Home from './pages/Home';
-import AnalyticsDashboard from './pages/AnalyticsDashboard';
-import ResultsPage from './pages/ResultsPage';
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "./firebaseConfig";
+import { FileProvider } from "./context/FileContext";
+import Home from "./pages/Home";
+import ResultsPage from "./pages/ResultsPage";
+import AnalyticsDashboard from "./pages/AnalyticsDashboard";
+import SignUp from "./pages/SignUp";
+import Login from "./pages/Login";
+import { Loader2 } from "lucide-react";
 
 function App() {
-  return (
-    <Router>
-      <div className="flex">
-        {/* Sidebar Navigation */}
-        <aside className="w-64 bg-gray-800 text-white min-h-screen p-4">
-          <h1 className="text-2xl font-bold mb-6">File Processor</h1>
-          <nav className="space-y-4">
-            <Link to="/" className="block text-lg hover:text-blue-400">
-              Home
-            </Link>
-            <Link to="/analytics" className="block text-lg hover:text-blue-400">
-              Analytics
-            </Link>
-            <Link to="/results" className="block text-lg hover:text-blue-400">
-              Results
-            </Link>
-          </nav>
-        </aside>
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
 
-        {/* Main Content */}
-        <main className="flex-1 p-6 bg-gray-50">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/analytics" element={<AnalyticsDashboard />} />
-            <Route path="/results" element={<ResultsPage />} />
-          </Routes>
-        </main>
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setIsAuthenticated(true);
+      } else {
+        setIsAuthenticated(false);
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  if (isAuthenticated === null) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
       </div>
-    </Router>
+    );
+  }
+
+  return (
+    <FileProvider>
+      <Router>
+        <Routes>
+          <Route
+            path="/"
+            element={
+              isAuthenticated ? (
+                <Navigate to="/home" replace />
+              ) : (
+                <Navigate to="/login" replace />
+              )
+            }
+          />
+          <Route
+            path="/home"
+            element={
+              isAuthenticated ? <Home /> : <Navigate to="/login" replace />
+            }
+          />
+          <Route
+            path="/results"
+            element={
+              isAuthenticated ? <ResultsPage /> : <Navigate to="/login" replace />
+            }
+          />
+          <Route
+            path="/analytics"
+            element={
+              isAuthenticated ? (
+                <AnalyticsDashboard />
+              ) : (
+                <Navigate to="/login" replace />
+              )
+            }
+          />
+          <Route path="/signup" element={<SignUp />} />
+          <Route path="/login" element={<Login />} />
+          <Route
+            path="*"
+            element={
+              <div className="min-h-screen flex items-center justify-center">
+                <h1 className="text-2xl font-bold text-gray-800">
+                  Page Not Found
+                </h1>
+              </div>
+            }
+          />
+        </Routes>
+      </Router>
+    </FileProvider>
   );
 }
 

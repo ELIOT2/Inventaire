@@ -1,19 +1,28 @@
-import React, { useContext } from 'react';
-import { ResultsTable } from '../components/ResultsTable';
-import { FileContext } from '../context/FileContext';
-import * as XLSX from 'xlsx';
+import React, { useEffect, useContext } from "react";
+import { fetchFilesFromFirestore } from "../lib/firestore";
+import { FileContext } from "../context/FileContext";
+import { ResultsTable } from "../components/ResultsTable";
+import * as XLSX from "xlsx";
 
 const ResultsPage = () => {
-  const { processedFiles } = useContext(FileContext)!;
+  const { processedFiles, setProcessedFiles } = useContext(FileContext)!;
+
+  useEffect(() => {
+    const fetchFiles = async () => {
+      const fetchedFiles = await fetchFilesFromFirestore();
+      setProcessedFiles(fetchedFiles);
+    };
+    fetchFiles();
+  }, [setProcessedFiles]);
 
   // Combine all data from processed files
   const allData = processedFiles.flatMap((file) => file.data);
 
   const handleExportToXLSX = () => {
-    const worksheet = XLSX.utils.json_to_sheet(allData); // Convert data to worksheet
-    const workbook = XLSX.utils.book_new(); // Create a new workbook
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Results'); // Append the worksheet
-    XLSX.writeFile(workbook, 'results.xlsx'); // Trigger download
+    const worksheet = XLSX.utils.json_to_sheet(allData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Results");
+    XLSX.writeFile(workbook, "results.xlsx");
   };
 
   return (
@@ -27,7 +36,7 @@ const ResultsPage = () => {
           onClick={handleExportToXLSX}
           className="px-4 py-2 bg-blue-500 text-white text-sm font-medium rounded hover:bg-blue-600 mb-4"
         >
-          Export to Excel
+          Export to XLSX
         </button>
         <ResultsTable data={allData} />
       </div>

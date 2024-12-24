@@ -1,13 +1,22 @@
-import React, { useContext } from 'react';
-import { FileUpload } from '../components/FileUpload';
-import { FileContext } from '../context/FileContext';
+import React, { useEffect, useContext } from "react";
+import { fetchFilesFromFirestore, deleteFileFromFirestore } from "../lib/firestore";
+import { FileContext } from "../context/FileContext";
+import { FileUpload } from "../components/FileUpload";
 
 const Home = () => {
   const { processedFiles, setProcessedFiles } = useContext(FileContext)!;
 
-  const handleRemoveFile = (index: number) => {
-    const updatedFiles = processedFiles.filter((_, i) => i !== index);
-    setProcessedFiles(updatedFiles); // Update the global context
+  useEffect(() => {
+    const fetchFiles = async () => {
+      const fetchedFiles = await fetchFilesFromFirestore();
+      setProcessedFiles(fetchedFiles);
+    };
+    fetchFiles();
+  }, [setProcessedFiles]);
+
+  const handleRemoveFile = async (id: string) => {
+    await deleteFileFromFirestore(id);
+    setProcessedFiles((prev) => prev.filter((file) => file.id !== id));
   };
 
   return (
@@ -21,10 +30,10 @@ const Home = () => {
         <div className="mt-8">
           <h2 className="text-lg font-semibold mb-4">Uploaded Files:</h2>
           <div className="space-y-4">
-            {processedFiles.map((file, index) => (
+            {processedFiles.map((file) => (
               <div
-                key={index}
-                className="flex justify-between items-center p-4 bg-gray-100 rounded-lg shadow-sm hover:shadow-md transition-shadow"
+                key={file.id}
+                className="flex justify-between items-center p-4 bg-gray-100 rounded-lg shadow-sm"
               >
                 <div>
                   <p className="text-sm font-medium text-gray-700">{file.name}</p>
@@ -33,7 +42,7 @@ const Home = () => {
                   </p>
                 </div>
                 <button
-                  onClick={() => handleRemoveFile(index)}
+                  onClick={() => handleRemoveFile(file.id)}
                   className="px-3 py-1 text-sm font-medium text-white bg-red-500 rounded-lg hover:bg-red-600 transition-colors"
                 >
                   Remove

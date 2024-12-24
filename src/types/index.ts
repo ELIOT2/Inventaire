@@ -1,10 +1,11 @@
 export interface ZoneData {
-  ean: string; // EAN code
-  quantity: number; // Quantity
-  zone: string; // Zone
+  ean: string;
+  quantity: number;
+  zone: string;
 }
 
 export interface ProcessedFile {
+  id: string; // Firestore document ID
   name: string; // File name
-  data: ZoneData[]; // Array of ZoneData
+  data: ZoneData[]; // Processed data
 }

@@ -1,6 +1,6 @@
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { auth } from "../firebaseConfig";
-import { LayoutDashboard, FolderOpen, BarChart2, LogOut } from "lucide-react";
+import { LayoutDashboard, FolderOpen, BarChart2, LogOut, FileSearch } from "lucide-react";
 
 const Sidebar = () => {
   const navigate = useNavigate();
@@ -16,6 +16,7 @@ const Sidebar = () => {
   const menuItems = [
     { path: "/home", label: "Home", icon: FolderOpen },
     { path: "/analytics", label: "Analytics", icon: BarChart2 },
+    { path: "/data-analysis", label: "Data Analysis", icon: FileSearch },
     { path: "/results", label: "Results", icon: LayoutDashboard },
   ];
 

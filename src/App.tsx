@@ -6,6 +6,7 @@ import { FileProvider } from "./context/FileContext";
 import Home from "./pages/Home";
 import ResultsPage from "./pages/ResultsPage";
 import AnalyticsDashboard from "./pages/AnalyticsDashboard";
+import DataAnalysis from "./pages/DataAnalysis";
 import SignUp from "./pages/SignUp";
 import Login from "./pages/Login";
 import { Loader2 } from "lucide-react";
@@ -64,6 +65,16 @@ function App() {
             element={
               isAuthenticated ? (
                 <AnalyticsDashboard />
+              ) : (
+                <Navigate to="/login" replace />
+              )
+            }
+          />
+          <Route
+            path="/data-analysis"
+            element={
+              isAuthenticated ? (
+                <DataAnalysis />
               ) : (
                 <Navigate to="/login" replace />
               )
